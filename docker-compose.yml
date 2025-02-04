@@ -1,0 +1,40 @@
+version: "3.9"
+services:
+
+  database:
+    image: postgres:latest
+    container_name:  cloud-storage-database
+    restart: always
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - '5432:5432'
+
+  server:
+    container_name: cloud-storage-backend
+    build: ./
+    image: cloud-storage-back-app:latest
+    ports:
+      - '8888:8888'
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://database:5432/postgres
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_LIQUIBASE_URL=jdbc:postgresql://database:5432/postgres
+      - SPRING_LIQUIBASE_USER=postgres
+      - SPRING_LIQUIBASE_PASSWORD=postgres
+    depends_on:
+      - database
+
+  client:
+    container_name: frontend-client-vue
+    build:
+      context: cloudStorage-front
+      dockerfile: Dockerfile
+    image: cloud-storage-front:latest
+    ports:
+      - "8080:8080"
+
